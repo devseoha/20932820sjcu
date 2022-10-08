@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@700&family=Noto+Serif+KR&family=Open+Sans&display=swap" rel="stylesheet">
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f04f63bc7ba3988d60d8cdd3f8221ebf"></script>
+    <style>
+      * {
+        font-family: 'IBM Plex Sans KR', sans-serif;
+      }
+      body{
+        padding: 10px
+      }
+      body > div > h4{
+        text-align: center;
+      }
+      #map{
+        width: 100%;
+        height: 350px;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h4><%= title %></h4>
+    </div>
+    <select style="width: 100%" onchange="changeGu(this.value)">
+      <% for(let i=0; i<gu.length; i++){ %>
+        <option value="<%= gu[i].name%>" <% if(gu[i].name == selectGuObj.name){%> selected <% } %>><%= gu[i].name%></option>
+      <% } %>
+    </select>
+    <div id="map"></div>
+    <div style="background-color: antiquewhite; border-radius: 5px; padding: 1px">
+      <h5>주소 : <span id="address"></span></h5>
+      <h5>이름 : <span id="title"></span></h5>
+      <h5>전화번호 : <span id="tel"></span></h5>
+      <h5>주중이용가능시간 : <span id="week"></span></h5>
+      <h5>토요일이용가능시간 : <span id="sat"></span></h5>
+      <h5>휴일이용가능시간 : <span id="holi"></span></h5>
+    </div>
+  </body>
+</html>
+<script>
+  let container = document.getElementById('map');
+  let options = {
+    center: new kakao.maps.LatLng("<%= selectGuObj.lat %>","<%= selectGuObj.lng %>"),
+    level: 5
+  };
+
+  let map = new kakao.maps.Map(container, options);
+
+  let positions = [
+    <% for(let i=0; i<list.length; i++){ %>
+    {
+      title: '<%= list[i].FCLTYNM %>',
+      latlng: new kakao.maps.LatLng(<%= list[i].LATITUDE %>, <%= list[i].LONGITUDE %>),
+      address : '<%= list[i].RDNMADR %> <%= list[i].INSTLLCDESC%>',
+      tel : '<%= list[i].INSTITUTIONPHONENUMBER %>',
+      week : '<%= list[i].WEEKDAYOPEROPENHHMM %> ~ <%= list[i].WEEKDAYOPERCOLSEHHMM %>',
+      sat : '<%= list[i].SATOPEROPEROPENHHMM %> ~ <%= list[i].SATOPERCLOSEHHMM %>',
+      holi : '<%= list[i].HOLIDAYOPEROPENHHMM %> ~ <%= list[i].HOLIDAYCLOSEOPENHHMM %>'
+    }<% if(i<list.length-1){%>,<%}%>
+    <% } %>
+  ];
+
+  var imageSrc = "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png";
+
+  for (let i = 0; i < positions.length; i ++) {
+    let imageSize = new kakao.maps.Size(24, 35);
+    let markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize);
+    let marker = new kakao.maps.Marker({
+      map: map,
+      position: positions[i].latlng,
+      title : positions[i].title,
+      image : markerImage,
+      clickable:true
+    });
+
+    kakao.maps.event.addListener(marker, 'click', function() {
+      document.getElementById("title").innerText = positions[i].title;
+      document.getElementById("address").innerText = positions[i].address;
+      document.getElementById("tel").innerText = positions[i].tel;
+      document.getElementById("sat").innerText = positions[i].sat;
+      document.getElementById("holi").innerText = positions[i].holi;
+      document.getElementById("week").innerText = positions[i].week;
+    });
+  }
+
+  function changeGu(gu){
+    location.href = `/?gu=${gu}`;
+  }
+
+
+</script>
