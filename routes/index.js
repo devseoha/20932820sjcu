@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const axios = require("axios");
+const geolib = require("geolib");
 const gu = [
   {name: "종로구", lat: "37.5735701", lng: "126.979002"},
   {name: "중구", lat: "37.5638392", lng: "126.9975659"},
@@ -30,21 +31,43 @@ const gu = [
 ];
 
 router.get("/", async function (req, res, next) {
-  const selectGu = req.query.gu ? req.query.gu : "관악구";
-  const findIdx = gu.findIndex((x) => x.name === selectGu);
-  const selectGuObj = gu[findIdx];
+  let selectGu = req.query.gu ? req.query.gu : "관악구";
+  const {lat, lng, address} = req.query;
+  let result = [];
+  const allList = [];
+  const guList = [];
+  let findLatlng = false;
   let url = `http://openapi.seoul.go.kr:8088/48555473476d6d3436344853757868/json/tbElecWheelChrCharge/1/1000`;
   const data = await axios.get(url, {headers: {"Content-type": "application/x-www-form-urlencoded; charset=UTF-8", Accept: "*/*"}});
-
-  const result = [];
   const list = data.data.tbElecWheelChrCharge.row;
   list.map((x) => {
-    if (x.SIGNGUNM == selectGu && x.LATITUDE != "" && x.LONGITUDE != "") {
+    if (x.LATITUDE != "" && x.LONGITUDE != "") {
+      allList.push({latitude: x.LATITUDE, longitude: x.LONGITUDE, ...x});
       result.push(x);
+      if (x.SIGNGUNM == selectGu) {
+        guList.push(x);
+      }
     }
   });
 
-  res.render("index", {title: "서울시 전동휠체어 급속충전가능기이용 정보", selectGuObj: selectGuObj, gu: gu, list: result});
+  if (lat && lng) {
+    const find = geolib.findNearest({lat, lng}, allList);
+    selectGu = find.SIGNGUNM;
+    result.unshift(find);
+    findLatlng = true;
+  } else {
+    result = guList;
+  }
+  const findIdx = gu.findIndex((x) => x.name === selectGu);
+  const selectGuObj = gu[findIdx];
+  res.render("index", {
+    title: "서울시 전동휠체어 급속충전가능기이용 정보",
+    selectGuObj: selectGuObj,
+    gu: gu,
+    list: result,
+    findLatlng: findLatlng,
+    address: address,
+  });
 });
 
 module.exports = router;

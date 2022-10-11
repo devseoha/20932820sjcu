@@ -3,52 +3,56 @@
   <head>
     <title><%= title %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-
-    <style>
-      body{
-        padding: 10px
-      }
-      body > div > h4{
-        text-align: center;
-      }
-      #map{
-        width: 100%;
-        height: 350px;
-      }
-    </style>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
-    <div>
-      <h4><%= title %></h4>
-    </div>
-    <div style="margin:10px; display: inline">
-      <h5 style="display: inline; width: 50%">전체보기</h5>
-      <select style="width: 50%" onchange="changeGu(this.value)">
-        <% for(let i=0; i<gu.length; i++){ %>
-          <option value="<%= gu[i].name%>" <% if(gu[i].name == selectGuObj.name){%> selected <% } %>><%= gu[i].name%></option>
-        <% } %>
-      </select>
-    </div>
-    <div style="margin:10px">
-      <h5 style="display: inline; width: 50%">주소로 검색하기</h5>
-      <input style="width: 50%" id="daumAddr" value="주소를 입력해주세요." onclick="init()"/>
-    </div>
-
-
-    <div id="map"></div>
-    <div style="background-color: antiquewhite; border-radius: 5px; padding: 1px">
-      <h5>주소 : <span id="address"></span></h5>
-      <h5>이름 : <span id="title"></span></h5>
-      <h5>전화번호 : <span id="tel"></span></h5>
-      <h5>주중이용가능시간 : <span id="week"></span></h5>
-      <h5>토요일이용가능시간 : <span id="sat"></span></h5>
-      <h5>휴일이용가능시간 : <span id="holi"></span></h5>
+    <div class="center max-width">
+      <div class="text-center">
+        <h4><%= title %></h4>
+      </div>
+      <div>
+        <div class="search">
+          <h5 class="sub-title">지역별 검색</h5>
+          <div class="dropdown">
+            <div class="select">
+              <span><%= selectGuObj.name%></span>
+            </div>
+            <ul class="dropdown-menu">
+              <% for(let i=0; i<gu.length; i++){ %>
+                <li value="<%= gu[i].name%>" <% if(gu[i].name == selectGuObj.name){%> active <%}%> onclick="changeGu('<%= gu[i].name%>')"><%= gu[i].name%></li>
+              <% } %>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="search">
+          <h5 class="sub-title">상세 검색</h5>
+          <div class="dropdown">
+            <div class="select">
+              <span id="daumAddr" onclick="init()"><% if(findLatlng){ %> <%= address %> <%}else{%>상세 주소를 검색해주세요.<%}%></span>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+      <div id="map"></div>
+      <div class="max-width info" >
+        <input id="latlng" value="<%= list[0].LATITUDE %>,<%= list[0].LONGITUDE%>" hidden/>
+        <h5>주소 : <span id="address"><%= list[0].RDNMADR %> <%= list[0].INSTLLCDESC%></span><button class="btn" onclick="findMap()">길 찾기</button></h5>
+        <h5>이름 : <span id="title"><%= list[0].FCLTYNM %></span></h5>
+        <h5>전화번호 : <span id="tel"><%= list[0].INSTITUTIONPHONENUMBER %></span></h5>
+        <h5>주중이용가능시간 : <span id="week"><%= list[0].WEEKDAYOPEROPENHHMM %> ~ <%= list[0].WEEKDAYOPERCOLSEHHMM %></span></h5>
+        <h5>토요일이용가능시간 : <span id="sat"><%= list[0].SATOPEROPEROPENHHMM %> ~ <%= list[0].SATOPERCLOSEHHMM %></span></h5>
+        <h5>휴일이용가능시간 : <span id="holi"><%= list[0].HOLIDAYOPEROPENHHMM %> ~ <%= list[0].HOLIDAYCLOSEOPENHHMM %></span></h5>
+      </div>
     </div>
   </body>
 </html>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f04f63bc7ba3988d60d8cdd3f8221ebf"></script>
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f04f63bc7ba3988d60d8cdd3f8221ebf&libraries=services"></script>
+
 <script>
   let container = document.getElementById('map');
   let options = {
@@ -63,6 +67,8 @@
     {
       title: '<%= list[i].FCLTYNM %>',
       latlng: new kakao.maps.LatLng(<%= list[i].LATITUDE %>, <%= list[i].LONGITUDE %>),
+      lat: '<%= list[i].LATITUDE %>',
+      lng: '<%= list[i].LONGITUDE %>',
       address : '<%= list[i].RDNMADR %> <%= list[i].INSTLLCDESC%>',
       tel : '<%= list[i].INSTITUTIONPHONENUMBER %>',
       week : '<%= list[i].WEEKDAYOPEROPENHHMM %> ~ <%= list[i].WEEKDAYOPERCOLSEHHMM %>',
@@ -72,10 +78,10 @@
     <% } %>
   ];
 
-  var imageSrc = "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png";
+  let imageSrc = "/image/point.png";
 
   for (let i = 0; i < positions.length; i ++) {
-    let imageSize = new kakao.maps.Size(24, 35);
+    let imageSize = new kakao.maps.Size(28, 28);
     let markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize);
     let marker = new kakao.maps.Marker({
       map: map,
@@ -86,8 +92,9 @@
     });
 
     kakao.maps.event.addListener(marker, 'click', function() {
-      document.getElementById("title").innerText = positions[i].title;
+      document.getElementById("latlng").value = positions[i].lat + "," +positions[i].lng,
       document.getElementById("address").innerText = positions[i].address;
+      document.getElementById("title").innerText = positions[i].title;
       document.getElementById("tel").innerText = positions[i].tel;
       document.getElementById("sat").innerText = positions[i].sat;
       document.getElementById("holi").innerText = positions[i].holi;
@@ -96,31 +103,47 @@
   }
 
   function changeGu(gu){
-    location.href = `/?gu=${gu}`;
+    location.href = `?gu=${gu}`;
   }
 
-  // $.ajax({
-  //   url: "https://dapi.kakao.com/v2/local/search/address.json",
-  //   data: { query: "남부순환로224길 33" },
-  //   method: "GET",
-  //   dataType: "json",
-  //   headers:{
-  //     Authorization : "KakaoAK 40dfcce37ff7184e87cf00202868f508"
-  //   }
-  // })
-  // .done(function(data) {
-  //   console.log(data);
-  // })
-  // .fail(function(xhr, status, errorThrown) {
-  //
-  // })
+  function findMap(){
+    const name = document.getElementById("title").innerText
+    const latlng = document.getElementById("latlng").value;
+    window.open(`https://map.kakao.com/link/to/${name},${latlng}`);
+  }
+
+  let geocoder = new kakao.maps.services.Geocoder();
 
   function init(){
     new daum.Postcode({
       oncomplete: function(data) {
-        cpo
+        geocoder.addressSearch(data.address, function(result, status) {
+          if (status === kakao.maps.services.Status.OK) {
+            location.href = `?lat=${result[0].y}&lng=${lng=result[0].x}&address=${data.address}`;
+          }
+        });
+
       }
     }).open();
   }
+
+  $('.dropdown').click(function () {
+    $(this).attr('tabindex', 1).focus();
+    $(this).toggleClass('active');
+    $(this).find('.dropdown-menu').slideToggle(300);
+  });
+  $('.dropdown').focusout(function () {
+    $(this).removeClass('active');
+    $(this).find('.dropdown-menu').slideUp(300);
+  });
+  $('.dropdown .dropdown-menu li').click(function () {
+    $(this).parents('.dropdown').find('span').text($(this).text());
+    $(this).parents('.dropdown').find('input').attr('value', $(this).attr('id'));
+  });
+  $('.dropdown-menu li').click(function () {
+    var input = '<strong>' + $(this).parents('.dropdown').find('input').val() + '</strong>',
+            msg = '<span class="msg">Hidden input value: ';
+    $('.msg').html(msg + input + '</span>');
+  });
 
 </script>
