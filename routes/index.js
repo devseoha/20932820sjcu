@@ -33,8 +33,7 @@ router.get("/", async function (req, res, next) {
   const selectGu = req.query.gu ? req.query.gu : "관악구";
   const findIdx = gu.findIndex((x) => x.name === selectGu);
   const selectGuObj = gu[findIdx];
-
-  let url = `http://openapi.seoul.go.kr:8088/${process.env.SECRET_KEY}/json/tbElecWheelChrCharge/1/1000`;
+  let url = `http://openapi.seoul.go.kr:8088/48555473476d6d3436344853757868/json/tbElecWheelChrCharge/1/1000`;
   const data = await axios.get(url, {headers: {"Content-type": "application/x-www-form-urlencoded; charset=UTF-8", Accept: "*/*"}});
 
   const result = [];

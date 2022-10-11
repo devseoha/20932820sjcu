@@ -3,15 +3,8 @@
   <head>
     <title><%= title %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@700&family=Noto+Serif+KR&family=Open+Sans&display=swap" rel="stylesheet">
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f04f63bc7ba3988d60d8cdd3f8221ebf"></script>
+
     <style>
-      * {
-        font-family: 'IBM Plex Sans KR', sans-serif;
-      }
       body{
         padding: 10px
       }
@@ -28,11 +21,20 @@
     <div>
       <h4><%= title %></h4>
     </div>
-    <select style="width: 100%" onchange="changeGu(this.value)">
-      <% for(let i=0; i<gu.length; i++){ %>
-        <option value="<%= gu[i].name%>" <% if(gu[i].name == selectGuObj.name){%> selected <% } %>><%= gu[i].name%></option>
-      <% } %>
-    </select>
+    <div style="margin:10px; display: inline">
+      <h5 style="display: inline; width: 50%">전체보기</h5>
+      <select style="width: 50%" onchange="changeGu(this.value)">
+        <% for(let i=0; i<gu.length; i++){ %>
+          <option value="<%= gu[i].name%>" <% if(gu[i].name == selectGuObj.name){%> selected <% } %>><%= gu[i].name%></option>
+        <% } %>
+      </select>
+    </div>
+    <div style="margin:10px">
+      <h5 style="display: inline; width: 50%">주소로 검색하기</h5>
+      <input style="width: 50%" id="daumAddr" value="주소를 입력해주세요." onclick="init()"/>
+    </div>
+
+
     <div id="map"></div>
     <div style="background-color: antiquewhite; border-radius: 5px; padding: 1px">
       <h5>주소 : <span id="address"></span></h5>
@@ -44,10 +46,13 @@
     </div>
   </body>
 </html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f04f63bc7ba3988d60d8cdd3f8221ebf"></script>
 <script>
   let container = document.getElementById('map');
   let options = {
-    center: new kakao.maps.LatLng("<%= selectGuObj.lat %>","<%= selectGuObj.lng %>"),
+    center: new kakao.maps.LatLng("<%= list[0].LATITUDE %>","<%= list[0].LONGITUDE %>"),
     level: 5
   };
 
@@ -94,5 +99,28 @@
     location.href = `/?gu=${gu}`;
   }
 
+  // $.ajax({
+  //   url: "https://dapi.kakao.com/v2/local/search/address.json",
+  //   data: { query: "남부순환로224길 33" },
+  //   method: "GET",
+  //   dataType: "json",
+  //   headers:{
+  //     Authorization : "KakaoAK 40dfcce37ff7184e87cf00202868f508"
+  //   }
+  // })
+  // .done(function(data) {
+  //   console.log(data);
+  // })
+  // .fail(function(xhr, status, errorThrown) {
+  //
+  // })
+
+  function init(){
+    new daum.Postcode({
+      oncomplete: function(data) {
+        cpo
+      }
+    }).open();
+  }
 
 </script>
