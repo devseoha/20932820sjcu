@@ -6,7 +6,7 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
-    <div class="center max-width">
+    <div class="center max-width container">
       <div class="text-center">
         <h4><%= title %></h4>
       </div>
@@ -36,7 +36,7 @@
           </div>
         </div>
       </div>
-      <div id="map"></div>
+      <div id="map" class="container"></div>
       <div class="max-width info" >
         <input id="latlng" value="<%= list[0].LATITUDE %>,<%= list[0].LONGITUDE%>" hidden/>
         <h5>주소 : <span id="address"><%= list[0].RDNMADR %> <%= list[0].INSTLLCDESC%></span><button class="btn" onclick="findMap()">길 찾기</button></h5>
